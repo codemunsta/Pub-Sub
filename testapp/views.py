@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
+from rest_framework import status
 
 
 @csrf_exempt
@@ -18,9 +19,9 @@ def create_topic(request):
             name=data['topic']
         )
         topic.save()
-        return JsonResponse({'message': f'new topic {data["topic"]} created'})
+        return JsonResponse({'message': f'new topic {data["topic"]} created'}, status=status.HTTP_200_OK)
     else:
-        return JsonResponse({'message': 'method not allowed'})
+        return JsonResponse({'message': 'method not allowed'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @csrf_exempt
@@ -39,9 +40,9 @@ def subscription(request, topic):
             listener=url
         )
         subscribe.save()
-        return JsonResponse({'message': f'subscribed to {topic}'})
+        return JsonResponse({'message': f'subscribed to {topic}'}, status=status.HTTP_200_OK)
     else:
-        return JsonResponse({'message': 'method not allowed'})
+        return JsonResponse({'message': 'method not allowed'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @csrf_exempt
@@ -67,10 +68,10 @@ def publish_event(request, params):
                     'Content-Type': 'application/json'
                 }
                 response = requests.post(url, headers=headers, data=json.dumps(data))
-                return JsonResponse({'message': 'event published'})
+                return JsonResponse({'message': 'event published'}, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
             try:
-                subscriber = Subscribe.objects.get(id=params)
+                subscriber = Subscribe.objects.get(id=int(params))
                 Tp = get_object_or_404(Topic, name=subscriber.topic.name)
                 message = Message.objects.create(
                     topic=Tp,
@@ -85,9 +86,9 @@ def publish_event(request, params):
                     'Content-Type': 'application/json'
                 }
                 response = requests.post(url, headers=headers, data=json.dumps(data))
-                return JsonResponse({'message': 'event published'})
+                return JsonResponse({'message': 'event published'}, status=status.HTTP_200_OK)
             except ObjectDoesNotExist:
-                return JsonResponse({'message': 'no topic or subscriber found'})
+                return JsonResponse({'message': 'no topic or subscriber found'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @csrf_exempt
@@ -95,4 +96,4 @@ def publish_event(request, params):
 def listener(request):
     if request.method == 'POST':
         print(request.data)
-        return JsonResponse({'message': 'okay'})
+        return JsonResponse({'message': 'okay'}, status=status.HTTP_200_OK)

@@ -6,5 +6,5 @@ urlpatterns = [
     re_path(r'^create/topic/$', create_topic),
     re_path(r'^subscribe/(?P<topic>[\w-]+)/$', subscription),
     re_path(r'^publish/(?P<params>[\w-]+)/$', publish_event),
-    re_path(r'^event$', listener)
+    re_path(r'^event/$', listener)
 ]
